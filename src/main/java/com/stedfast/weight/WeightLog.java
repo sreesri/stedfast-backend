@@ -27,6 +27,6 @@ public class WeightLog {
     private BigDecimal weight;
 
     @CreationTimestamp
-    @Column(name = "logged_at", insertable = false, updatable = false) // Let DB handle default
-    private LocalDateTime loggedAt;
+    @Column(name = "logged_time", insertable = false, updatable = false) // Let DB handle default
+    private LocalDateTime loggedTime;
 }
