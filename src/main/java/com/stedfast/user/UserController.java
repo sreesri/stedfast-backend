@@ -26,4 +26,11 @@ public class UserController {
         Page<User> users = userService.getAllUsers(pageable);
         return ResponseEntity.ok(users);
     }
+
+    @org.springframework.web.bind.annotation.PostMapping
+    public ResponseEntity<User> createUser(
+            @org.springframework.web.bind.annotation.RequestBody UserCreateRequest request) {
+        User createdUser = userService.createUser(request);
+        return new ResponseEntity<>(createdUser, org.springframework.http.HttpStatus.CREATED);
+    }
 }

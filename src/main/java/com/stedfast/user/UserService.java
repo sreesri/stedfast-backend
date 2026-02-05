@@ -16,4 +16,15 @@ public class UserService {
     public Page<User> getAllUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
+
+    @Transactional
+    public User createUser(UserCreateRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email already in use");
+        }
+        User user = new User();
+        user.setName(request.getName());
+        user.setEmail(request.getEmail());
+        return userRepository.save(user);
+    }
 }

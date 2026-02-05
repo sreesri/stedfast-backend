@@ -17,6 +17,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -48,5 +49,26 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].id").value(1L))
                 .andExpect(jsonPath("$.content[0].name").value("Test User"));
+    }
+
+    @Test
+    void createUser_ShouldReturnCreated() throws Exception {
+        UserCreateRequest request = new UserCreateRequest();
+        request.setName("New User");
+        request.setEmail("new@example.com");
+
+        User createdUser = new User();
+        createdUser.setId(2L);
+        createdUser.setName(request.getName());
+        createdUser.setEmail(request.getEmail());
+
+        when(userService.createUser(any(UserCreateRequest.class))).thenReturn(createdUser);
+
+        mockMvc.perform(post("/api/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(2L))
+                .andExpect(jsonPath("$.name").value("New User"));
     }
 }
