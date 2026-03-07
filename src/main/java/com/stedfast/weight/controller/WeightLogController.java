@@ -1,4 +1,8 @@
-package com.stedfast.weight;
+package com.stedfast.weight.controller;
+
+import com.stedfast.weight.dto.WeightLogRequest;
+import com.stedfast.weight.service.WeightLogService;
+import com.stedfast.weight.models.WeightLog;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

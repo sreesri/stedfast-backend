@@ -1,4 +1,8 @@
-package com.stedfast.user;
+package com.stedfast.user.controller;
+
+import com.stedfast.user.dto.UserCreateRequest;
+import com.stedfast.user.service.UserService;
+import com.stedfast.user.models.User;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

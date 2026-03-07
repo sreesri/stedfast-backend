@@ -1,4 +1,4 @@
-package com.stedfast.weight;
+package com.stedfast.weight.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

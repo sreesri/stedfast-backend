@@ -1,4 +1,4 @@
-package com.stedfast.user;
+package com.stedfast.user.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

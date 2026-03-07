@@ -1,6 +1,6 @@
-package com.stedfast.weight;
+package com.stedfast.weight.models;
 
-import com.stedfast.user.User;
+import com.stedfast.user.models.User;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package com.stedfast.user;
+package com.stedfast.user.models;
 
 import jakarta.persistence.*;
 import lombok.Data;

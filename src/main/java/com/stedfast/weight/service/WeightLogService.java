@@ -1,7 +1,11 @@
-package com.stedfast.weight;
+package com.stedfast.weight.service;
 
-import com.stedfast.user.User;
-import com.stedfast.user.UserRepository;
+import com.stedfast.weight.dto.WeightLogRequest;
+import com.stedfast.weight.repository.WeightLogRepository;
+import com.stedfast.weight.models.WeightLog;
+
+import com.stedfast.user.models.User;
+import com.stedfast.user.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
