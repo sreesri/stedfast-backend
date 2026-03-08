@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface FastingLogRepository extends JpaRepository<FastingLog, Long> {
+public interface FastingLogRepository extends JpaRepository<FastingLog, String> {
 
     Optional<FastingLog> findFirstByUserAndStatusOrderByStartTimeDesc(User user, FastingStatus status);
 

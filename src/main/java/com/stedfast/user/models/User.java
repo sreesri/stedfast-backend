@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import de.fxlae.typeid.TypeId;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "users")
@@ -14,8 +16,15 @@ import java.time.LocalDateTime;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(length = 31)
+    private String id;
+
+    @PrePersist
+    public void generateId() {
+        if (this.id == null) {
+            this.id = TypeId.generate("user").toString();
+        }
+    }
 
     @Column(nullable = false, unique = true)
     private String name;
@@ -24,6 +33,6 @@ public class User {
     private String email;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    @Column(name = "createdAt", updatable = false)
+    private ZonedDateTime createdAt;
 }

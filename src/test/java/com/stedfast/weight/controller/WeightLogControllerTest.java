@@ -1,7 +1,10 @@
-package com.stedfast.weight;
+package com.stedfast.weight.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.stedfast.user.User;
+import com.stedfast.user.models.User;
+import com.stedfast.weight.dto.WeightLogRequest;
+import com.stedfast.weight.models.WeightLog;
+import com.stedfast.weight.service.WeightLogService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -33,15 +36,15 @@ class WeightLogControllerTest {
     @Test
     void logWeight_ShouldReturnCreated() throws Exception {
         WeightLogRequest request = new WeightLogRequest();
-        request.setUserId(1L);
+        request.setUserId("user_123");
         request.setWeight(new BigDecimal("75.50"));
 
         WeightLog createdLog = new WeightLog();
-        createdLog.setId(1L);
+        createdLog.setId("weight_123");
         createdLog.setWeight(request.getWeight());
         createdLog.setLoggedTime(LocalDateTime.now());
         User user = new User();
-        user.setId(1L);
+        user.setId("user_123");
         createdLog.setUser(user);
 
         when(weightLogService.logWeight(any(WeightLogRequest.class))).thenReturn(createdLog);
@@ -50,7 +53,7 @@ class WeightLogControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.id").value("weight_123"))
                 .andExpect(jsonPath("$.weight").value(75.50));
     }
 }

@@ -1,9 +1,8 @@
 package com.stedfast.fasting.models;
 
-import com.stedfast.fasting.models.FastingStatus;
-
 import com.stedfast.user.models.User;
 import jakarta.persistence.*;
+import de.fxlae.typeid.TypeId;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.ZonedDateTime;
@@ -15,8 +14,15 @@ import java.time.ZonedDateTime;
 public class FastingLog {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(length = 31)
+    private String id;
+
+    @PrePersist
+    public void generateId() {
+        if (this.id == null) {
+            this.id = TypeId.generate("fastlog").toString();
+        }
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "userId", nullable = false)

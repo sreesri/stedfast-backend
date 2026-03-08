@@ -1,4 +1,8 @@
-package com.stedfast.user;
+package com.stedfast.user.controller;
+
+import com.stedfast.user.dto.UserCreateRequest;
+import com.stedfast.user.models.User;
+import com.stedfast.user.service.UserService;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +37,7 @@ class UserControllerTest {
     @Test
     void getAllUsers_ShouldReturnPageOfUsers() throws Exception {
         User user = new User();
-        user.setId(1L);
+        user.setId("user_123");
         user.setName("Test User");
         user.setEmail("test@example.com");
 
@@ -47,7 +51,7 @@ class UserControllerTest {
                 .param("size", "10")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].id").value(1L))
+                .andExpect(jsonPath("$.content[0].id").value("user_123"))
                 .andExpect(jsonPath("$.content[0].name").value("Test User"));
     }
 
@@ -58,7 +62,7 @@ class UserControllerTest {
         request.setEmail("new@example.com");
 
         User createdUser = new User();
-        createdUser.setId(2L);
+        createdUser.setId("user_456");
         createdUser.setName(request.getName());
         createdUser.setEmail(request.getEmail());
 
@@ -68,7 +72,7 @@ class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(2L))
+                .andExpect(jsonPath("$.id").value("user_456"))
                 .andExpect(jsonPath("$.name").value("New User"));
     }
 }
