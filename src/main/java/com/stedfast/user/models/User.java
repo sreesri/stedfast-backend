@@ -32,6 +32,9 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String password;
+
     @CreationTimestamp
     @Column(name = "createdAt", updatable = false)
     private ZonedDateTime createdAt;
