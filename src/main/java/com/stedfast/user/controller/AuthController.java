@@ -41,4 +41,10 @@ public class AuthController {
         final String token = jwtUtils.generateToken(userDetails);
         return ResponseEntity.ok(new AuthResponse(token));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout() {
+        org.springframework.security.core.context.SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("Logged out successfully");
+    }
 }
