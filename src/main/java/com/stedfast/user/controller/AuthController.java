@@ -1,7 +1,6 @@
 package com.stedfast.user.controller;
 
 import com.stedfast.security.JwtUtils;
-import com.stedfast.security.SecurityUser;
 import com.stedfast.user.dto.AuthResponse;
 import com.stedfast.user.dto.LoginRequest;
 import com.stedfast.user.dto.UserCreateRequest;
