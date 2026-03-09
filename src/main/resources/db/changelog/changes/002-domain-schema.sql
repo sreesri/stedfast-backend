@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS userConfig (
     userId varchar(31) PRIMARY KEY,
     fastingWindow int DEFAULT 18,
     eatingWindow int DEFAULT 6,
+    fastingStartTime TIME DEFAULT '19:00:00',
     calorieLimit int DEFAULT 2000,
     CONSTRAINT fk_userConfig_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
 );

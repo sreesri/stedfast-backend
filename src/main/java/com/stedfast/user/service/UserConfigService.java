@@ -14,7 +14,7 @@ public class UserConfigService {
 
     public UserConfig getUserConfig(String userId) {
         return userConfigRepository.findById(userId)
-                .orElse(new UserConfig(userId, 18, 6, 2000));
+                .orElse(new UserConfig(userId, 18, 6, 2000, java.time.LocalTime.of(19, 0)));
     }
 
     @Transactional
