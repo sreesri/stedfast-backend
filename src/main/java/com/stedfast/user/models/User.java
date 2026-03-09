@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import de.fxlae.typeid.TypeId;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 
 @Entity

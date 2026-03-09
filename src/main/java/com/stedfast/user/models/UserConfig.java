@@ -26,6 +26,5 @@ public class UserConfig {
     private int calorieLimit = 2000;
 
     @Column(name = "fastingStartTime")
-    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "h:mm a")
     private java.time.LocalTime fastingStartTime = java.time.LocalTime.of(19, 0);
 }
