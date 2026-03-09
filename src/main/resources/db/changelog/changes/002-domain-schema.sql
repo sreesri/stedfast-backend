@@ -24,3 +24,11 @@ CREATE TABLE IF NOT EXISTS fastingLog (
     end_time TIMESTAMP WITH TIME ZONE,
     CONSTRAINT fk_fastingLog_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS userConfig (
+    userId varchar(31) PRIMARY KEY,
+    fastingWindow int DEFAULT 18,
+    eatingWindow int DEFAULT 6,
+    calorieLimit int DEFAULT 2000,
+    CONSTRAINT fk_userConfig_user FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
