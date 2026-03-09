@@ -19,9 +19,9 @@ public class WeightLogService {
     private final UserRepository userRepository;
 
     @Transactional
-    public WeightLog logWeight(WeightLogRequest request) {
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + request.getUserId()));
+    public WeightLog logWeight(String userId, WeightLogRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + userId));
 
         WeightLog weightLog = new WeightLog();
         weightLog.setUser(user);

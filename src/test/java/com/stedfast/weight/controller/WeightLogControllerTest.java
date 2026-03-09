@@ -21,7 +21,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(WeightLogController.class)
+@WebMvcTest(value = WeightLogController.class, excludeAutoConfiguration = {
+        org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+        org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration.class
+})
 class WeightLogControllerTest {
 
     @Autowired
@@ -36,7 +39,6 @@ class WeightLogControllerTest {
     @Test
     void logWeight_ShouldReturnCreated() throws Exception {
         WeightLogRequest request = new WeightLogRequest();
-        request.setUserId("user_123");
         request.setWeight(new BigDecimal("75.50"));
 
         WeightLog createdLog = new WeightLog();
@@ -47,7 +49,7 @@ class WeightLogControllerTest {
         user.setId("user_123");
         createdLog.setUser(user);
 
-        when(weightLogService.logWeight(any(WeightLogRequest.class))).thenReturn(createdLog);
+        when(weightLogService.logWeight(any(), any(WeightLogRequest.class))).thenReturn(createdLog);
 
         mockMvc.perform(post("/api/weights")
                 .contentType(MediaType.APPLICATION_JSON)

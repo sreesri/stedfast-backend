@@ -7,8 +7,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -20,9 +18,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         com.stedfast.user.models.User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        return new org.springframework.security.core.userdetails.User(
+        return new com.stedfast.security.SecurityUser(
                 user.getEmail(),
                 user.getPassword(),
-                new ArrayList<>());
+                new java.util.ArrayList<>(),
+                user.getId());
     }
 }

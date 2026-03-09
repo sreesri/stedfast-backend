@@ -8,6 +8,5 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 public class WeightLogRequest {
-    private String userId;
     private BigDecimal weight;
 }
