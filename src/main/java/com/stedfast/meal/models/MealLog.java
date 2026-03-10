@@ -31,7 +31,7 @@ public class MealLog {
     @PrePersist
     public void generateId() {
         if (this.id == null) {
-            this.id = TypeId.generate("mealLog").toString();
+            this.id = TypeId.generate("ml").toString();
         }
     }
 
