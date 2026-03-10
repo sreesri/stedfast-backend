@@ -32,9 +32,9 @@ public class FastingLog {
     @Column(nullable = false, length = 50)
     private FastingStatus status;
 
-    @Column(name = "start_time", nullable = false)
+    @Column(name = "startTime", nullable = false)
     private ZonedDateTime startTime;
 
-    @Column(name = "end_time")
+    @Column(name = "endTime")
     private ZonedDateTime endTime;
 }
