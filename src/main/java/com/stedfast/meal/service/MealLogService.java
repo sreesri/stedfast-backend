@@ -54,6 +54,13 @@ public class MealLogService {
         return toResponse(mealLogRepository.save(mealLog));
     }
 
+    @Transactional
+    public void deleteMealLog(String userId, String mealLogId) {
+        MealLog mealLog = mealLogRepository.findByIdAndUser_Id(mealLogId, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Meal log not found or unauthorized"));
+        mealLogRepository.delete(mealLog);
+    }
+
     private MealLogResponse toResponse(MealLog mealLog) {
         return MealLogResponse.builder()
                 .id(mealLog.getId())

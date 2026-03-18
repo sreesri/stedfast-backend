@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -42,5 +44,13 @@ public class MealLogController {
             @RequestBody MealLogRequest request) {
         MealLogResponse mealLog = mealLogService.saveMealLog(user.getUserId(), request);
         return new ResponseEntity<>(mealLog, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteMealLog(
+            @AuthenticationPrincipal SecurityUser user,
+            @PathVariable String id) {
+        mealLogService.deleteMealLog(user.getUserId(), id);
+        return ResponseEntity.noContent().build();
     }
 }
