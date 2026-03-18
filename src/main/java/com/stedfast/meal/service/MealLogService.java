@@ -61,6 +61,19 @@ public class MealLogService {
         mealLogRepository.delete(mealLog);
     }
 
+    @Transactional
+    public MealLogResponse updateMealLog(String userId, String mealLogId, MealLogRequest request) {
+        MealLog mealLog = mealLogRepository.findByIdAndUser_Id(mealLogId, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Meal log not found or unauthorized"));
+
+        mealLog.setMealType(request.getMealType());
+        mealLog.setMealTime(request.getMealTime());
+        mealLog.setDish(request.getDish());
+        mealLog.setCalories(request.getCalories());
+
+        return toResponse(mealLogRepository.save(mealLog));
+    }
+
     private MealLogResponse toResponse(MealLog mealLog) {
         return MealLogResponse.builder()
                 .id(mealLog.getId())
