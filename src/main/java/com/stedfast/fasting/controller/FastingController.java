@@ -6,6 +6,7 @@ import com.stedfast.fasting.service.FastingService;
 import com.stedfast.security.SecurityUser;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/fasting")
 @RequiredArgsConstructor
+@Slf4j
 public class FastingController {
 
     private final FastingService fastingService;

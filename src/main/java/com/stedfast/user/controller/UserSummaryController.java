@@ -15,10 +15,12 @@ import com.stedfast.user.dto.UserSummaryResponse;
 import com.stedfast.user.service.UserSummaryService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/user/summary")
 @RequiredArgsConstructor
+@Slf4j
 public class UserSummaryController {
 
     private final UserSummaryService userSummaryService;
