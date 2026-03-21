@@ -12,6 +12,7 @@ import lombok.Data;
 public class MealLogResponse {
     private String id;
     private String userId;
+    private DateMealLogs dayMealLogs;
     private MealType mealType;
     private ZonedDateTime mealTime;
     private String dish;

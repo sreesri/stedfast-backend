@@ -18,11 +18,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Authentication", description = "Endpoints for user registration and login")
 public class AuthController {
 
     private final UserService userService;
@@ -31,11 +34,13 @@ public class AuthController {
     private final UserDetailsService userDetailsService;
 
     @PostMapping("/register")
+    @Operation(summary = "Register a new user", description = "Creates a new user account with the provided details")
     public ResponseEntity<User> register(@RequestBody UserCreateRequest request) {
         return new ResponseEntity<>(userService.createUser(request), HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Authenticate user", description = "Returns a JWT token on successful authentication")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
 
         authenticationManager.authenticate(
@@ -46,6 +51,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
+    @Operation(summary = "Logout user", description = "Clears the security context")
     public ResponseEntity<String> logout() {
         org.springframework.security.core.context.SecurityContextHolder.clearContext();
         return ResponseEntity.ok("Logged out successfully");

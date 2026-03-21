@@ -14,16 +14,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 
 @RestController
 @RequestMapping("/api/weights")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Weight Logs", description = "Endpoints for tracking user weight")
+@SecurityRequirement(name = "bearerAuth")
 public class WeightLogController {
 
     private final WeightLogService weightLogService;
 
     @PostMapping
+    @Operation(summary = "Log weight", description = "Creates a new weight entry for the user")
     public ResponseEntity<WeightLog> logWeight(
             @AuthenticationPrincipal SecurityUser user,
             @RequestBody WeightLogRequest request) {
