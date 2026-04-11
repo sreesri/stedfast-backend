@@ -1,18 +1,15 @@
 package com.stedfast.meal.repository;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
+import com.stedfast.meal.models.MealLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.stedfast.meal.models.MealLog;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MealLogRepository extends JpaRepository<MealLog, String> {
-
-    List<MealLog> findAllByUser_IdAndMealTimeBetween(String userId, ZonedDateTime start, ZonedDateTime end);
-
-    Optional<MealLog> findByIdAndUser_Id(String id, String userId);
-
+    List<MealLog> findAllByUserIdAndMealTimeBetween(String userId, ZonedDateTime start, ZonedDateTime end);
+    Optional<MealLog> findByIdAndUserId(String id, String userId);
 }

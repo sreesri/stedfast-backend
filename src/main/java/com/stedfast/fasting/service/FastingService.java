@@ -1,10 +1,11 @@
 package com.stedfast.fasting.service;
 
-import com.stedfast.fasting.dto.FastingChangeRequest;
-import com.stedfast.fasting.models.FastingStatus;
-import com.stedfast.fasting.repository.UserFastingRepository;
-import com.stedfast.fasting.models.UserFasting;
-import com.stedfast.fasting.dto.CurrentFastingResponse;
+import com.stedfast.fasting.dto.FastingScheduleRequest;
+import com.stedfast.fasting.dto.FastingSessionRequest;
+import com.stedfast.fasting.models.FastingSchedule;
+import com.stedfast.fasting.models.FastingSession;
+import com.stedfast.fasting.repository.FastingScheduleRepository;
+import com.stedfast.fasting.repository.FastingSessionRepository;
 import com.stedfast.user.models.User;
 import com.stedfast.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,58 +13,77 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class FastingService {
 
-        private final UserRepository userRepository;
-        private final UserFastingRepository userFastingRepository;
+    private final FastingScheduleRepository scheduleRepository;
+    private final FastingSessionRepository sessionRepository;
+    private final UserRepository userRepository;
 
-        public CurrentFastingResponse getCurrentFasting(String userId) {
-                User user = userRepository.findById(userId)
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+    @Transactional
+    public FastingSchedule createSchedule(String userId, FastingScheduleRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-                Optional<UserFasting> userFasting = userFastingRepository.findById(userId);
+        FastingSchedule schedule = new FastingSchedule();
+        schedule.setUser(user);
+        schedule.setFastingHours(request.getFastingHours());
+        schedule.setEatingHours(request.getEatingHours());
+        schedule.setLabel(request.getLabel());
 
-                if (userFasting.isPresent()) {
-                        UserFasting uf = userFasting.get();
-                        return CurrentFastingResponse.builder()
-                                        .userId(user.getId())
-                                        .status(uf.getStatus())
-                                        .startTime(uf.getStartTime())
-                                        .build();
-                } else {
-                        return CurrentFastingResponse.builder()
-                                        .userId(user.getId())
-                                        .status(FastingStatus.FASTING)
-                                        .startTime(ZonedDateTime.now())
-                                        .build();
-                }
+        return scheduleRepository.save(schedule);
+    }
+
+    @Transactional
+    public FastingSession startSession(String userId, FastingSessionRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Check for active session
+        sessionRepository.findByUserIdAndStatus(userId, FastingSession.SessionStatus.ACTIVE)
+                .ifPresent(s -> {
+                    throw new RuntimeException("Active session already exists");
+                });
+
+        FastingSession session = new FastingSession();
+        session.setUser(user);
+        session.setSessionType(request.getSessionType());
+        session.setStatus(FastingSession.SessionStatus.ACTIVE);
+
+        if (request.getScheduleId() != null) {
+            FastingSchedule schedule = scheduleRepository.findById(request.getScheduleId())
+                    .orElseThrow(() -> new RuntimeException("Schedule not found"));
+            session.setSchedule(schedule);
         }
 
-        @Transactional
-        public CurrentFastingResponse updateFastingStatus(String userId, FastingChangeRequest request) {
-                User user = userRepository.findById(userId)
-                                .orElseThrow(() -> new RuntimeException("User not found"));
+        return sessionRepository.save(session);
+    }
 
-                UserFasting userFasting = userFastingRepository.findById(userId)
-                                .orElseGet(() -> {
-                                        UserFasting uf = new UserFasting();
-                                        uf.setUserId(userId);
-                                        return uf;
-                                });
+    @Transactional
+    public FastingSession endSession(String userId) {
+        FastingSession session = sessionRepository.findByUserIdAndStatus(userId, FastingSession.SessionStatus.ACTIVE)
+                .orElseThrow(() -> new RuntimeException("No active session found"));
 
-                userFasting.setStatus(request.getStatus());
-                userFasting.setStartTime(request.getStartTime());
+        ZonedDateTime now = ZonedDateTime.now();
+        session.setEndedAt(now);
+        session.setStatus(FastingSession.SessionStatus.COMPLETED);
+        
+        long minutes = ChronoUnit.MINUTES.between(session.getStartedAt(), now);
+        session.setDurationMinutes((int) minutes);
 
-                userFastingRepository.save(userFasting);
+        return sessionRepository.save(session);
+    }
 
-                return CurrentFastingResponse.builder()
-                                .userId(user.getId())
-                                .status(userFasting.getStatus())
-                                .startTime(userFasting.getStartTime())
-                                .build();
-        }
+    public List<FastingSchedule> getSchedules(String userId) {
+        return scheduleRepository.findAllByUserId(userId);
+    }
+
+    public Optional<FastingSession> getActiveSession(String userId) {
+        return sessionRepository.findByUserIdAndStatus(userId, FastingSession.SessionStatus.ACTIVE);
+    }
 }

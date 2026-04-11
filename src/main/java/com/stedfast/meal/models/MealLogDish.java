@@ -1,6 +1,5 @@
 package com.stedfast.meal.models;
 
-import com.stedfast.user.models.User;
 import de.fxlae.typeid.TypeId;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,14 +8,12 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
-@Table(name = "meal_logs")
+@Table(name = "meal_log_dishes")
 @Data
 @NoArgsConstructor
-public class MealLog {
+public class MealLogDish {
 
     @Id
     @Column(length = 50)
@@ -25,17 +22,19 @@ public class MealLog {
     @PrePersist
     public void generateId() {
         if (this.id == null) {
-            this.id = TypeId.generate("meallog").toString();
+            this.id = TypeId.generate("mldish").toString();
         }
     }
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "meal_log_id", nullable = false)
+    private MealLog mealLog;
 
-    @Column(name = "meal_time", nullable = false)
-    private ZonedDateTime mealTime = ZonedDateTime.now();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dish_id")
+    private Dish dish;
 
+    private String name;
     private Integer calories;
 
     @Column(precision = 5, scale = 2)
@@ -47,12 +46,10 @@ public class MealLog {
     @Column(precision = 5, scale = 2)
     private BigDecimal fat;
 
-    private String notes;
+    @Column(nullable = false)
+    private Integer quantity = 1;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private ZonedDateTime createdAt;
-
-    @OneToMany(mappedBy = "mealLog", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<MealLogDish> dishes = new ArrayList<>();
 }

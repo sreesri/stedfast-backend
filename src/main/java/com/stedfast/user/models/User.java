@@ -35,6 +35,6 @@ public class User {
     private String password;
 
     @CreationTimestamp
-    @Column(name = "createdAt", updatable = false)
+    @Column(name = "created_at", updatable = false)
     private ZonedDateTime createdAt;
 }
