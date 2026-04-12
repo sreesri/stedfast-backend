@@ -43,4 +43,20 @@ public class MealController {
         mealService.deleteDish(user.getUserId(), id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/logs")
+    @Operation(summary = "Get meal logs for a specific day")
+    public ResponseEntity<List<com.stedfast.meal.models.MealLog>> getMealLogs(
+            @AuthenticationPrincipal SecurityUser user,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate date) {
+        return ResponseEntity.ok(mealService.getMealLogsForDay(user.getUserId(), date));
+    }
+
+    @PostMapping("/logs")
+    @Operation(summary = "Log a new meal")
+    public ResponseEntity<com.stedfast.meal.models.MealLog> logMeal(
+            @AuthenticationPrincipal SecurityUser user,
+            @RequestBody com.stedfast.meal.dto.MealLogRecordRequest request) {
+        return ResponseEntity.ok(mealService.saveMealLog(user.getUserId(), request));
+    }
 }

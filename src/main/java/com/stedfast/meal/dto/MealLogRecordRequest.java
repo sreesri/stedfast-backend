@@ -16,5 +16,8 @@ class MealLogDishRequest {
     private String dishId;
     private String name;
     private Integer calories;
+    private java.math.BigDecimal protein;
+    private java.math.BigDecimal carbs;
+    private java.math.BigDecimal fat;
     private Integer quantity;
 }
