@@ -1,7 +1,9 @@
 package com.stedfast.health.controller;
 
 import com.stedfast.health.dto.BodyStatsRequest;
+import com.stedfast.health.dto.UserIntakeLimitRequest;
 import com.stedfast.health.models.BodyStats;
+import com.stedfast.health.models.UserIntakeLimit;
 import com.stedfast.health.service.BodyStatsService;
 import com.stedfast.security.SecurityUser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,5 +35,19 @@ public class BodyStatsController {
             @AuthenticationPrincipal SecurityUser user,
             @RequestBody BodyStatsRequest request) {
         return ResponseEntity.ok(bodyStatsService.saveStats(user.getUserId(), request));
+    }
+
+    @GetMapping("/limits")
+    @Operation(summary = "Get user intake limits", description = "Returns the daily intake limits for the authenticated user")
+    public ResponseEntity<UserIntakeLimit> getLimits(@AuthenticationPrincipal SecurityUser user) {
+        return ResponseEntity.ok(bodyStatsService.getLimits(user.getUserId()));
+    }
+
+    @PostMapping("/limits")
+    @Operation(summary = "Set user intake limits", description = "Sets or updates the daily intake limits for the authenticated user")
+    public ResponseEntity<UserIntakeLimit> setLimits(
+            @AuthenticationPrincipal SecurityUser user,
+            @RequestBody UserIntakeLimitRequest request) {
+        return ResponseEntity.ok(bodyStatsService.setLimits(user.getUserId(), request));
     }
 }

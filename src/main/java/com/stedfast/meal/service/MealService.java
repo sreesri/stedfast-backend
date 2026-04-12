@@ -2,6 +2,7 @@ package com.stedfast.meal.service;
 
 import com.stedfast.meal.dto.DishRequest;
 import com.stedfast.meal.dto.MealLogRecordRequest;
+import com.stedfast.meal.dto.MealLogDishRequest;
 import com.stedfast.meal.models.Dish;
 import com.stedfast.meal.models.MealLog;
 import com.stedfast.meal.models.MealLogDish;
