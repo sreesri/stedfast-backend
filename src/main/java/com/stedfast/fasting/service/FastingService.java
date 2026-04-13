@@ -30,13 +30,46 @@ public class FastingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        // Disable Existing Schedule
+        Optional<FastingSchedule> existingSchedule = scheduleRepository.findByUserIdAndIsActiveTrue(userId);
+        if (existingSchedule.isPresent()) {
+            existingSchedule.get().setIsActive(false);
+            scheduleRepository.save(existingSchedule.get());
+        }
+
+        // Create new Schedule
         FastingSchedule schedule = new FastingSchedule();
         schedule.setUser(user);
         schedule.setFastingHours(request.getFastingHours());
         schedule.setEatingHours(request.getEatingHours());
         schedule.setLabel(request.getLabel());
+        schedule.setIsActive(true);
+
+        // Start Fasting Session or Eating Session based on the fasting start time
+        startFastingSessionBasedOnSchedule(user, schedule, request.getFastingStartTime());
 
         return scheduleRepository.save(schedule);
+    }
+
+    public void startFastingSessionBasedOnSchedule(User user, FastingSchedule schedule,
+            ZonedDateTime fastingStartTime) {
+        // create fasting session if fasting start time is in the past
+        if (fastingStartTime.isBefore(ZonedDateTime.now())) {
+            FastingSession session = new FastingSession();
+            session.setUser(user);
+            session.setSessionType(FastingSession.SessionType.FAST);
+            session.setStatus(FastingSession.SessionStatus.ACTIVE);
+            session.setStartedAt(fastingStartTime);
+            sessionRepository.save(session);
+        } // create eating session if the fasting start time is in the future
+        else {
+            FastingSession session = new FastingSession();
+            session.setUser(user);
+            session.setSessionType(FastingSession.SessionType.EAT);
+            session.setStatus(FastingSession.SessionStatus.ACTIVE);
+            session.setStartedAt(ZonedDateTime.now());
+            sessionRepository.save(session);
+        }
     }
 
     @Transactional
