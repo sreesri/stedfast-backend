@@ -1,5 +1,7 @@
 package com.stedfast.fasting.service;
 
+import com.stedfast.exception.BadRequestException;
+import com.stedfast.exception.ResourceNotFoundException;
 import com.stedfast.fasting.dto.FastingScheduleRequest;
 import com.stedfast.fasting.dto.FastingSessionRequest;
 import com.stedfast.fasting.models.FastingSchedule;
@@ -28,7 +30,7 @@ public class FastingService {
     @Transactional
     public FastingSchedule createSchedule(String userId, FastingScheduleRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         // Disable Existing Schedule
         Optional<FastingSchedule> existingSchedule = scheduleRepository.findByUserIdAndIsActiveTrue(userId);
@@ -75,12 +77,12 @@ public class FastingService {
     @Transactional
     public FastingSession startSession(String userId, FastingSessionRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         // Check for active session
         sessionRepository.findByUserIdAndStatus(userId, FastingSession.SessionStatus.ACTIVE)
                 .ifPresent(s -> {
-                    throw new RuntimeException("Active session already exists");
+                    throw new BadRequestException("Active session already exists for user: " + userId);
                 });
 
         FastingSession session = new FastingSession();
@@ -90,7 +92,7 @@ public class FastingService {
 
         if (request.getScheduleId() != null) {
             FastingSchedule schedule = scheduleRepository.findById(request.getScheduleId())
-                    .orElseThrow(() -> new RuntimeException("Schedule not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Schedule not found: " + request.getScheduleId()));
             session.setSchedule(schedule);
         }
 
@@ -100,7 +102,7 @@ public class FastingService {
     @Transactional
     public FastingSession endSession(String userId) {
         FastingSession session = sessionRepository.findByUserIdAndStatus(userId, FastingSession.SessionStatus.ACTIVE)
-                .orElseThrow(() -> new RuntimeException("No active session found"));
+                .orElseThrow(() -> new ResourceNotFoundException("No active session found for user: " + userId));
 
         ZonedDateTime now = ZonedDateTime.now();
         session.setEndedAt(now);

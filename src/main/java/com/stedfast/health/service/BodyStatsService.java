@@ -1,5 +1,6 @@
 package com.stedfast.health.service;
 
+import com.stedfast.exception.ResourceNotFoundException;
 import com.stedfast.health.dto.BodyStatsRequest;
 import com.stedfast.health.dto.UserIntakeLimitRequest;
 import com.stedfast.health.models.BodyStats;
@@ -31,7 +32,7 @@ public class BodyStatsService {
     @Transactional
     public BodyStats saveStats(String userId, BodyStatsRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         BodyStats stats = bodyStatsRepository.findByUserIdAndLoggedDate(userId, request.getLoggedDate())
                 .orElse(new BodyStats());
@@ -56,7 +57,7 @@ public class BodyStatsService {
     @Transactional
     public UserIntakeLimit setLimits(String userId, UserIntakeLimitRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         UserIntakeLimit limit = userIntakeLimitRepository.findByUserId(userId)
                 .orElse(new UserIntakeLimit());

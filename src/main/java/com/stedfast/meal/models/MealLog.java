@@ -1,5 +1,6 @@
 package com.stedfast.meal.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.stedfast.user.models.User;
 import de.fxlae.typeid.TypeId;
 import jakarta.persistence.*;
@@ -29,6 +30,7 @@ public class MealLog {
         }
     }
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

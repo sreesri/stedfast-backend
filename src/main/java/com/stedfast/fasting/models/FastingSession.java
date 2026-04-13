@@ -1,5 +1,7 @@
 package com.stedfast.fasting.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.stedfast.user.models.User;
 import de.fxlae.typeid.TypeId;
 import jakarta.persistence.*;
@@ -33,10 +35,12 @@ public class FastingSession {
         }
     }
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schedule_id")
     private FastingSchedule schedule;

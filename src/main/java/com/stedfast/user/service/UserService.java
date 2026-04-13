@@ -1,5 +1,7 @@
 package com.stedfast.user.service;
 
+import com.stedfast.exception.ConflictException;
+import com.stedfast.exception.ResourceNotFoundException;
 import com.stedfast.user.dto.UserCreateRequest;
 import com.stedfast.user.models.User;
 import com.stedfast.user.repository.UserRepository;
@@ -18,7 +20,7 @@ public class UserService {
     @Transactional
     public User createUser(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new ConflictException("Email already exists: " + request.getEmail());
         }
 
         User user = new User();
@@ -31,6 +33,6 @@ public class UserService {
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 }

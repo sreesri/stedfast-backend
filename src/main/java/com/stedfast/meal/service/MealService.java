@@ -1,5 +1,6 @@
 package com.stedfast.meal.service;
 
+import com.stedfast.exception.ResourceNotFoundException;
 import com.stedfast.meal.dto.DishRequest;
 import com.stedfast.meal.dto.MealLogRecordRequest;
 import com.stedfast.meal.dto.MealLogDishRequest;
@@ -33,7 +34,7 @@ public class MealService {
     @Transactional
     public Dish createDish(String userId, DishRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         Dish dish = new Dish();
         dish.setUser(user);
@@ -53,10 +54,10 @@ public class MealService {
     @Transactional
     public void deleteDish(String userId, String dishId) {
         Dish dish = dishRepository.findById(dishId)
-                .orElseThrow(() -> new RuntimeException("Dish not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Dish not found: " + dishId));
         
         if (!dish.getUser().getId().equals(userId)) {
-            throw new RuntimeException("Unauthorized");
+            throw new ResourceNotFoundException("Unauthorized access to dish: " + dishId);
         }
         
         dishRepository.delete(dish);
@@ -65,7 +66,7 @@ public class MealService {
     @Transactional
     public MealLog saveMealLog(String userId, MealLogRecordRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
         MealLog mealLog = new MealLog();
         mealLog.setUser(user);
@@ -79,7 +80,7 @@ public class MealService {
 
             if (dRequest.getDishId() != null) {
                 Dish template = dishRepository.findById(dRequest.getDishId())
-                        .orElseThrow(() -> new RuntimeException("Dish template not found"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Dish template not found: " + dRequest.getDishId()));
                 mlDish.setDish(template);
                 mlDish.setName(template.getName());
                 mlDish.setCalories(template.getCalories());
