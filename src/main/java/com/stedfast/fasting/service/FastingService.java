@@ -72,7 +72,7 @@ public class FastingService {
         ZonedDateTime now = ZonedDateTime.now();
         session.setEndedAt(now);
         session.setStatus(FastingSession.SessionStatus.COMPLETED);
-        
+
         long minutes = ChronoUnit.MINUTES.between(session.getStartedAt(), now);
         session.setDurationMinutes((int) minutes);
 
@@ -81,6 +81,11 @@ public class FastingService {
 
     public List<FastingSchedule> getSchedules(String userId) {
         return scheduleRepository.findAllByUserId(userId);
+    }
+
+    public FastingSchedule getActiveSchedule(String userId) {
+        Optional<FastingSchedule> optFastingSchedule = scheduleRepository.findByUserIdAndIsActiveTrue(userId);
+        return optFastingSchedule.orElse(null);
     }
 
     public Optional<FastingSession> getActiveSession(String userId) {

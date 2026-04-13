@@ -29,6 +29,12 @@ public class FastingController {
         return ResponseEntity.ok(fastingService.getSchedules(user.getUserId()));
     }
 
+    @GetMapping("/schedules/active")
+    @Operation(summary = "Get active user schedule")
+    public ResponseEntity<FastingSchedule> getActiveSchedule(@AuthenticationPrincipal SecurityUser user) {
+        return ResponseEntity.ok(fastingService.getActiveSchedule(user.getUserId()));
+    }
+
     @PostMapping("/schedules")
     @Operation(summary = "Create a new schedule")
     public ResponseEntity<FastingSchedule> createSchedule(
