@@ -2,15 +2,19 @@ package com.stedfast.meal.controller;
 
 import com.stedfast.meal.dto.DishRequest;
 import com.stedfast.meal.models.Dish;
+import com.stedfast.meal.models.MealLog;
+import com.stedfast.meal.models.UserIntakeSummary;
 import com.stedfast.meal.service.MealService;
 import com.stedfast.security.SecurityUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -46,17 +50,32 @@ public class MealController {
 
     @GetMapping("/logs")
     @Operation(summary = "Get meal logs for a specific day")
-    public ResponseEntity<List<com.stedfast.meal.models.MealLog>> getMealLogs(
+    public ResponseEntity<List<MealLog>> getMealLogs(
             @AuthenticationPrincipal SecurityUser user,
-            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate date) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         return ResponseEntity.ok(mealService.getMealLogsForDay(user.getUserId(), date));
     }
 
     @PostMapping("/logs")
     @Operation(summary = "Log a new meal")
-    public ResponseEntity<com.stedfast.meal.models.MealLog> logMeal(
+    public ResponseEntity<MealLog> logMeal(
             @AuthenticationPrincipal SecurityUser user,
             @RequestBody com.stedfast.meal.dto.MealLogRecordRequest request) {
         return ResponseEntity.ok(mealService.saveMealLog(user.getUserId(), request));
     }
+
+    @GetMapping("/intake-summary")
+    @Operation(summary = "Get intake summary for a date or range")
+    public ResponseEntity<List<UserIntakeSummary>> getIntakeSummary(
+            @AuthenticationPrincipal SecurityUser user,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        
+        LocalDate start = startDate != null ? startDate : (date != null ? date : LocalDate.now());
+        LocalDate end = endDate != null ? endDate : start;
+        
+        return ResponseEntity.ok(mealService.getIntakeSummaries(user.getUserId(), start, end));
+    }
+
 }

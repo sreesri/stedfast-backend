@@ -59,6 +59,7 @@ public class FastingService {
         if (fastingStartTime.isBefore(ZonedDateTime.now())) {
             FastingSession session = new FastingSession();
             session.setUser(user);
+            session.setSchedule(schedule);
             session.setSessionType(FastingSession.SessionType.FAST);
             session.setStatus(FastingSession.SessionStatus.ACTIVE);
             session.setStartedAt(fastingStartTime);
@@ -67,6 +68,7 @@ public class FastingService {
         else {
             FastingSession session = new FastingSession();
             session.setUser(user);
+            session.setSchedule(schedule);
             session.setSessionType(FastingSession.SessionType.EAT);
             session.setStatus(FastingSession.SessionStatus.ACTIVE);
             session.setStartedAt(ZonedDateTime.now());
@@ -79,16 +81,23 @@ public class FastingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
-        // Check for active session
+        ZonedDateTime startTime = request.getStartTime() != null ? request.getStartTime() : ZonedDateTime.now();
+
+        // Check for active session and complete it if present
         sessionRepository.findByUserIdAndStatus(userId, FastingSession.SessionStatus.ACTIVE)
-                .ifPresent(s -> {
-                    throw new BadRequestException("Active session already exists for user: " + userId);
+                .ifPresent(session -> {
+                    session.setEndedAt(startTime);
+                    session.setStatus(FastingSession.SessionStatus.COMPLETED);
+                    long minutes = ChronoUnit.MINUTES.between(session.getStartedAt(), startTime);
+                    session.setDurationMinutes((int) minutes);
+                    sessionRepository.save(session);
                 });
 
         FastingSession session = new FastingSession();
         session.setUser(user);
         session.setSessionType(request.getSessionType());
         session.setStatus(FastingSession.SessionStatus.ACTIVE);
+        session.setStartedAt(startTime);
 
         if (request.getScheduleId() != null) {
             FastingSchedule schedule = scheduleRepository.findById(request.getScheduleId())

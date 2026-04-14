@@ -59,9 +59,4 @@ public class FastingController {
         return ResponseEntity.ok(fastingService.startSession(user.getUserId(), request));
     }
 
-    @PostMapping("/session/end")
-    @Operation(summary = "End the active session")
-    public ResponseEntity<FastingSession> endSession(@AuthenticationPrincipal SecurityUser user) {
-        return ResponseEntity.ok(fastingService.endSession(user.getUserId()));
-    }
 }

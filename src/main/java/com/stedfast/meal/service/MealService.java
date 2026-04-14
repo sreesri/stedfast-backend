@@ -7,8 +7,12 @@ import com.stedfast.meal.dto.MealLogDishRequest;
 import com.stedfast.meal.models.Dish;
 import com.stedfast.meal.models.MealLog;
 import com.stedfast.meal.models.MealLogDish;
+import com.stedfast.meal.models.UserIntakeSummary;
 import com.stedfast.meal.repository.DishRepository;
 import com.stedfast.meal.repository.MealLogRepository;
+import com.stedfast.meal.repository.UserIntakeSummaryRepository;
+import com.stedfast.health.models.UserIntakeLimit;
+import com.stedfast.health.repository.UserIntakeLimitRepository;
 import com.stedfast.user.models.User;
 import com.stedfast.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +33,8 @@ public class MealService {
 
     private final DishRepository dishRepository;
     private final MealLogRepository mealLogRepository;
+    private final UserIntakeSummaryRepository intakeSummaryRepository;
+    private final UserIntakeLimitRepository intakeLimitRepository;
     private final UserRepository userRepository;
 
     @Transactional
@@ -100,7 +106,10 @@ public class MealService {
         mealLog.setDishes(dishes);
         updateMealLogTotals(mealLog);
 
-        return mealLogRepository.save(mealLog);
+        MealLog savedLog = mealLogRepository.save(mealLog);
+        syncIntakeSummary(user, savedLog.getMealTime().toLocalDate());
+        
+        return savedLog;
     }
 
     @Transactional(readOnly = true)
@@ -108,6 +117,54 @@ public class MealService {
         ZonedDateTime start = date.atStartOfDay(ZoneId.systemDefault());
         ZonedDateTime end = date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
         return mealLogRepository.findAllByUserIdAndMealTimeBetween(userId, start, end);
+    }
+
+    @Transactional
+    public void syncIntakeSummary(User user, LocalDate date) {
+        ZonedDateTime start = date.atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime end = date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
+        
+        List<MealLog> dailyLogs = mealLogRepository.findAllByUserIdAndMealTimeBetween(user.getId(), start, end);
+        
+        UserIntakeSummary summary = intakeSummaryRepository.findByUserIdAndLoggedDateBetween(user.getId(), start, end)
+                .orElse(new UserIntakeSummary());
+        
+        if (summary.getId() == null) {
+            summary.setUser(user);
+            summary.setLoggedDate(start);
+            
+            // Set limits from current settings
+            UserIntakeLimit limits = intakeLimitRepository.findByUserId(user.getId()).orElse(null);
+            summary.setCalorieLimit(limits != null ? limits.getCalorieLimit() : 2000);
+            summary.setProteinLimit(limits != null ? limits.getProteinLimit() : 150);
+            summary.setCarbsLimit(limits != null ? limits.getCarbsLimit() : 250);
+            summary.setFatLimit(limits != null ? limits.getFatLimit() : 70);
+        }
+        
+        int totalCals = 0;
+        BigDecimal totalProtein = BigDecimal.ZERO;
+        BigDecimal totalCarbs = BigDecimal.ZERO;
+        BigDecimal totalFat = BigDecimal.ZERO;
+        
+        for (MealLog log : dailyLogs) {
+            totalCals += (log.getCalories() != null ? log.getCalories() : 0);
+            totalProtein = totalProtein.add(log.getProtein() != null ? log.getProtein() : BigDecimal.ZERO);
+            totalCarbs = totalCarbs.add(log.getCarbs() != null ? log.getCarbs() : BigDecimal.ZERO);
+            totalFat = totalFat.add(log.getFat() != null ? log.getFat() : BigDecimal.ZERO);
+        }
+        
+        summary.setConsumedCalories(totalCals);
+        summary.setConsumedProtein(totalProtein.intValue());
+        summary.setConsumedCarbs(totalCarbs.intValue());
+        summary.setConsumedFat(totalFat.intValue());
+        
+        intakeSummaryRepository.save(summary);
+    }
+
+    public List<UserIntakeSummary> getIntakeSummaries(String userId, LocalDate startDate, LocalDate endDate) {
+        ZonedDateTime start = startDate.atStartOfDay(ZoneId.systemDefault());
+        ZonedDateTime end = endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
+        return intakeSummaryRepository.findAllByUserIdAndLoggedDateBetweenOrderByLoggedDateAsc(userId, start, end);
     }
 
     private void updateMealLogTotals(MealLog mealLog) {
