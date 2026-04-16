@@ -61,11 +61,11 @@ public class MealService {
     public void deleteDish(String userId, String dishId) {
         Dish dish = dishRepository.findById(dishId)
                 .orElseThrow(() -> new ResourceNotFoundException("Dish not found: " + dishId));
-        
+
         if (!dish.getUser().getId().equals(userId)) {
             throw new ResourceNotFoundException("Unauthorized access to dish: " + dishId);
         }
-        
+
         dishRepository.delete(dish);
     }
 
@@ -79,7 +79,7 @@ public class MealService {
         meal.setNotes(request.getNotes());
         meal.setCreatedAt(request.getMealTime() != null ? request.getMealTime() : ZonedDateTime.now());
 
-        List<MealDish> dishes = (request.getDishes() != null ? request.getDishes() : Collections.emptyList()).stream().map(dRequest -> {
+        List<MealDish> dishes = (request.getDishes()).stream().map(dRequest -> {
             MealDish mealDish = new MealDish();
             mealDish.setMeal(meal);
             mealDish.setQuantity(dRequest.getQuantity() != null ? dRequest.getQuantity() : 1);
@@ -87,7 +87,8 @@ public class MealService {
 
             if (dRequest.getDishId() != null) {
                 Dish template = dishRepository.findById(dRequest.getDishId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Dish template not found: " + dRequest.getDishId()));
+                        .orElseThrow(() -> new ResourceNotFoundException(
+                                "Dish template not found: " + dRequest.getDishId()));
                 if (!template.getUser().getId().equals(userId)) {
                     throw new ResourceNotFoundException("Dish template not found: " + dRequest.getDishId());
                 }
@@ -112,7 +113,7 @@ public class MealService {
 
         Meal savedMeal = mealRepository.save(meal);
         syncIntakeSummary(user, savedMeal.getCreatedAt().toLocalDate());
-        
+
         return savedMeal;
     }
 
@@ -145,16 +146,17 @@ public class MealService {
     public void syncIntakeSummary(User user, LocalDate date) {
         ZonedDateTime start = date.atStartOfDay(ZoneId.systemDefault());
         ZonedDateTime end = date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
-        
-        List<Meal> dailyMeals = mealRepository.findAllByUser_IdAndCreatedAtBetweenOrderByCreatedAtDesc(user.getId(), start, end);
-        
+
+        List<Meal> dailyMeals = mealRepository.findAllByUser_IdAndCreatedAtBetweenOrderByCreatedAtDesc(user.getId(),
+                start, end);
+
         UserIntakeSummary summary = intakeSummaryRepository.findByUserIdAndLoggedDateBetween(user.getId(), start, end)
                 .orElse(new UserIntakeSummary());
-        
+
         if (summary.getId() == null) {
             summary.setUser(user);
             summary.setLoggedDate(start);
-            
+
             // Set limits from current settings
             UserIntakeLimit limits = intakeLimitRepository.findByUserId(user.getId()).orElse(null);
             summary.setCalorieLimit(limits != null ? limits.getCalorieLimit() : 2000);
@@ -162,24 +164,24 @@ public class MealService {
             summary.setCarbsLimit(limits != null ? limits.getCarbsLimit() : 250);
             summary.setFatLimit(limits != null ? limits.getFatLimit() : 70);
         }
-        
+
         int totalCals = 0;
         BigDecimal totalProtein = BigDecimal.ZERO;
         BigDecimal totalCarbs = BigDecimal.ZERO;
         BigDecimal totalFat = BigDecimal.ZERO;
-        
+
         for (Meal meal : dailyMeals) {
             totalCals += (meal.getCalories() != null ? meal.getCalories() : 0);
             totalProtein = totalProtein.add(meal.getProtein() != null ? meal.getProtein() : BigDecimal.ZERO);
             totalCarbs = totalCarbs.add(meal.getCarbs() != null ? meal.getCarbs() : BigDecimal.ZERO);
             totalFat = totalFat.add(meal.getFat() != null ? meal.getFat() : BigDecimal.ZERO);
         }
-        
+
         summary.setConsumedCalories(totalCals);
         summary.setConsumedProtein(totalProtein.intValue());
         summary.setConsumedCarbs(totalCarbs.intValue());
         summary.setConsumedFat(totalFat.intValue());
-        
+
         intakeSummaryRepository.save(summary);
     }
 
