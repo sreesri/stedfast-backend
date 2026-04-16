@@ -2,7 +2,7 @@ package com.stedfast.meal.controller;
 
 import com.stedfast.meal.dto.DishRequest;
 import com.stedfast.meal.models.Dish;
-import com.stedfast.meal.models.MealLog;
+import com.stedfast.meal.models.Meal;
 import com.stedfast.meal.models.UserIntakeSummary;
 import com.stedfast.meal.service.MealService;
 import com.stedfast.security.SecurityUser;
@@ -48,20 +48,37 @@ public class MealController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/logs")
-    @Operation(summary = "Get meal logs for a specific day")
-    public ResponseEntity<List<MealLog>> getMealLogs(
+    @GetMapping({"/meals", "/logs"})
+    @Operation(summary = "Get meals for a specific day")
+    public ResponseEntity<List<Meal>> getMeals(
             @AuthenticationPrincipal SecurityUser user,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        return ResponseEntity.ok(mealService.getMealLogsForDay(user.getUserId(), date));
+        return ResponseEntity.ok(mealService.getMealsForDay(user.getUserId(), date));
     }
 
-    @PostMapping("/logs")
-    @Operation(summary = "Log a new meal")
-    public ResponseEntity<MealLog> logMeal(
+    @GetMapping("/meals/{id}")
+    @Operation(summary = "Get a meal by id")
+    public ResponseEntity<Meal> getMeal(
+            @AuthenticationPrincipal SecurityUser user,
+            @PathVariable String id) {
+        return ResponseEntity.ok(mealService.getMeal(user.getUserId(), id));
+    }
+
+    @PostMapping({"/meals", "/logs"})
+    @Operation(summary = "Create a new meal")
+    public ResponseEntity<Meal> createMeal(
             @AuthenticationPrincipal SecurityUser user,
             @RequestBody com.stedfast.meal.dto.MealLogRecordRequest request) {
-        return ResponseEntity.ok(mealService.saveMealLog(user.getUserId(), request));
+        return ResponseEntity.ok(mealService.createMeal(user.getUserId(), request));
+    }
+
+    @DeleteMapping({"/meals/{id}", "/logs/{id}"})
+    @Operation(summary = "Delete a meal")
+    public ResponseEntity<Void> deleteMeal(
+            @AuthenticationPrincipal SecurityUser user,
+            @PathVariable String id) {
+        mealService.deleteMeal(user.getUserId(), id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/intake-summary")
