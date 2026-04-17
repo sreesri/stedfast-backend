@@ -59,9 +59,9 @@ public class FastingService {
         // Check for active session and complete it if present
         sessionRepository.findByUserIdAndStatus(user.getId(), FastingSession.SessionStatus.ACTIVE)
                 .ifPresent(session -> {
-                    session.setEndedAt(startTime);
+                    session.setEndedAt(fastingStartTime);
                     session.setStatus(FastingSession.SessionStatus.COMPLETED);
-                    long minutes = ChronoUnit.MINUTES.between(session.getStartedAt(), startTime);
+                    long minutes = ChronoUnit.MINUTES.between(session.getStartedAt(), fastingStartTime);
                     session.setDurationMinutes((int) minutes);
                     sessionRepository.save(session);
                 });
