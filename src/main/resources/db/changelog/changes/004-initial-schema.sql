@@ -4,6 +4,7 @@
 CREATE TABLE meals (
   id             VARCHAR(50) PRIMARY KEY,
   user_id        VARCHAR(50) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name           VARCHAR(255),
   calories       INT,
   protein        NUMERIC(5,2),
   carbs          NUMERIC(5,2),

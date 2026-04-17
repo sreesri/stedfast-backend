@@ -21,4 +21,7 @@ public interface MealRepository extends JpaRepository<Meal, String> {
 
     @EntityGraph(attributePaths = "dishes")
     Optional<Meal> findByIdAndUser_Id(String id, String userId);
+
+    @EntityGraph(attributePaths = "dishes")
+    List<Meal> findAllByUser_Id(String userId);
 }

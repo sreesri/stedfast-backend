@@ -55,6 +55,17 @@ public class FastingService {
 
     public void startFastingSessionBasedOnSchedule(User user, FastingSchedule schedule,
             ZonedDateTime fastingStartTime) {
+
+        // Check for active session and complete it if present
+        sessionRepository.findByUserIdAndStatus(user.getId(), FastingSession.SessionStatus.ACTIVE)
+                .ifPresent(session -> {
+                    session.setEndedAt(startTime);
+                    session.setStatus(FastingSession.SessionStatus.COMPLETED);
+                    long minutes = ChronoUnit.MINUTES.between(session.getStartedAt(), startTime);
+                    session.setDurationMinutes((int) minutes);
+                    sessionRepository.save(session);
+                });
+
         // create fasting session if fasting start time is in the past
         if (fastingStartTime.isBefore(ZonedDateTime.now())) {
             FastingSession session = new FastingSession();

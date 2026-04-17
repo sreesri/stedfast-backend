@@ -43,6 +43,8 @@ public class Meal {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    private String name;
+
     private Integer calories;
 
     @Column(precision = 5, scale = 2)
