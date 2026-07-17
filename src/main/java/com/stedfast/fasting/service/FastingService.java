@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -132,10 +131,6 @@ public class FastingService {
         session.setDurationMinutes((int) minutes);
 
         return sessionRepository.save(session);
-    }
-
-    public List<FastingSchedule> getSchedules(String userId) {
-        return scheduleRepository.findAllByUserId(userId);
     }
 
     public FastingSchedule getActiveSchedule(String userId) {

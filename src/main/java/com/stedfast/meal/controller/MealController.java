@@ -43,6 +43,15 @@ public class MealController {
         return ResponseEntity.ok(mealService.createDish(user.getUserId(), request));
     }
 
+    @PutMapping("/dishes/{id}")
+    @Operation(summary = "Update a dish template")
+    public ResponseEntity<Dish> updateDish(
+            @AuthenticationPrincipal SecurityUser user,
+            @PathVariable String id,
+            @RequestBody DishRequest request) {
+        return ResponseEntity.ok(mealService.updateDish(user.getUserId(), id, request));
+    }
+
     @DeleteMapping("/dishes/{id}")
     @Operation(summary = "Delete a dish template")
     public ResponseEntity<Void> deleteDish(
@@ -60,20 +69,21 @@ public class MealController {
         return ResponseEntity.ok(mealService.getUserMealTemplates(user.getUserId()));
     }
 
-    @GetMapping("/meals/{id}")
-    @Operation(summary = "Get a meal template by id")
-    public ResponseEntity<Meal> getMealTemplate(
-            @AuthenticationPrincipal SecurityUser user,
-            @PathVariable String id) {
-        return ResponseEntity.ok(mealService.getMealTemplate(user.getUserId(), id));
-    }
-
     @PostMapping("/meals")
     @Operation(summary = "Create a new meal template")
     public ResponseEntity<Meal> createMealTemplate(
             @AuthenticationPrincipal SecurityUser user,
             @RequestBody MealRequest request) {
         return ResponseEntity.ok(mealService.createMealTemplate(user.getUserId(), request));
+    }
+
+    @PutMapping("/meals/{id}")
+    @Operation(summary = "Update a meal template")
+    public ResponseEntity<Meal> updateMealTemplate(
+            @AuthenticationPrincipal SecurityUser user,
+            @PathVariable String id,
+            @RequestBody MealRequest request) {
+        return ResponseEntity.ok(mealService.updateMealTemplate(user.getUserId(), id, request));
     }
 
     @DeleteMapping("/meals/{id}")
@@ -94,20 +104,21 @@ public class MealController {
         return ResponseEntity.ok(mealService.getMealLogsForDay(user.getUserId(), date));
     }
 
-    @GetMapping("/logs/{id}")
-    @Operation(summary = "Get a specific meal log by id")
-    public ResponseEntity<MealLog> getMealLog(
-            @AuthenticationPrincipal SecurityUser user,
-            @PathVariable String id) {
-        return ResponseEntity.ok(mealService.getMealLog(user.getUserId(), id));
-    }
-
     @PostMapping("/logs")
     @Operation(summary = "Create a new meal log")
     public ResponseEntity<MealLog> createMealLog(
             @AuthenticationPrincipal SecurityUser user,
             @RequestBody MealLogRecordRequest request) {
         return ResponseEntity.ok(mealService.createMealLog(user.getUserId(), request));
+    }
+
+    @PutMapping("/logs/{id}")
+    @Operation(summary = "Update a meal log")
+    public ResponseEntity<MealLog> updateMealLog(
+            @AuthenticationPrincipal SecurityUser user,
+            @PathVariable String id,
+            @RequestBody MealLogRecordRequest request) {
+        return ResponseEntity.ok(mealService.updateMealLog(user.getUserId(), id, request));
     }
 
     @DeleteMapping("/logs/{id}")

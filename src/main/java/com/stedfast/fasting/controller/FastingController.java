@@ -23,12 +23,6 @@ public class FastingController {
 
     private final FastingService fastingService;
 
-    @GetMapping("/schedules")
-    @Operation(summary = "Get user schedules")
-    public ResponseEntity<List<FastingSchedule>> getSchedules(@AuthenticationPrincipal SecurityUser user) {
-        return ResponseEntity.ok(fastingService.getSchedules(user.getUserId()));
-    }
-
     @GetMapping("/schedules/active")
     @Operation(summary = "Get active user schedule")
     public ResponseEntity<FastingSchedule> getActiveSchedule(@AuthenticationPrincipal SecurityUser user) {
@@ -57,6 +51,12 @@ public class FastingController {
             @AuthenticationPrincipal SecurityUser user,
             @RequestBody FastingSessionRequest request) {
         return ResponseEntity.ok(fastingService.startSession(user.getUserId(), request));
+    }
+
+    @PostMapping("/session/end")
+    @Operation(summary = "End the active fasting/eating session")
+    public ResponseEntity<FastingSession> endSession(@AuthenticationPrincipal SecurityUser user) {
+        return ResponseEntity.ok(fastingService.endSession(user.getUserId()));
     }
 
 }

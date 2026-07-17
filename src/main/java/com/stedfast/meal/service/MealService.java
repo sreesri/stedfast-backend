@@ -64,6 +64,24 @@ public class MealService {
     }
 
     @Transactional
+    public Dish updateDish(String userId, String dishId, DishRequest request) {
+        Dish dish = dishRepository.findById(dishId)
+                .orElseThrow(() -> new ResourceNotFoundException("Dish not found: " + dishId));
+
+        if (!dish.getUser().getId().equals(userId)) {
+            throw new ResourceNotFoundException("Dish not found: " + dishId);
+        }
+
+        dish.setName(request.getName());
+        dish.setCalories(request.getCalories());
+        dish.setProtein(request.getProtein());
+        dish.setCarbs(request.getCarbs());
+        dish.setFat(request.getFat());
+
+        return dishRepository.save(dish);
+    }
+
+    @Transactional
     public void deleteDish(String userId, String dishId) {
         Dish dish = dishRepository.findById(dishId)
                 .orElseThrow(() -> new ResourceNotFoundException("Dish not found: " + dishId));
@@ -130,10 +148,49 @@ public class MealService {
         return mealRepository.findAllByUser_Id(userId);
     }
 
-    @Transactional(readOnly = true)
-    public Meal getMealTemplate(String userId, String mealId) {
-        return mealRepository.findByIdAndUser_Id(mealId, userId)
+    @Transactional
+    public Meal updateMealTemplate(String userId, String mealId, MealRequest request) {
+        Meal meal = mealRepository.findByIdAndUser_Id(mealId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Meal template not found: " + mealId));
+
+        meal.setName(request.getName());
+        meal.setNotes(request.getNotes());
+
+        meal.getDishes().clear();
+        if (request.getDishes() != null) {
+            List<MealDish> dishes = request.getDishes().stream().map(dRequest -> {
+                MealDish mealDish = new MealDish();
+                mealDish.setMeal(meal);
+                mealDish.setQuantity(dRequest.getQuantity() != null ? dRequest.getQuantity() : 1);
+                mealDish.setCreatedAt(meal.getCreatedAt());
+
+                if (dRequest.getDishId() != null) {
+                    Dish template = dishRepository.findById(dRequest.getDishId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Dish template not found: " + dRequest.getDishId()));
+                    if (!template.getUser().getId().equals(userId)) {
+                        throw new ResourceNotFoundException("Dish template not found: " + dRequest.getDishId());
+                    }
+                    mealDish.setDish(template);
+                    mealDish.setName(template.getName());
+                    mealDish.setCalories(template.getCalories());
+                    mealDish.setProtein(template.getProtein());
+                    mealDish.setCarbs(template.getCarbs());
+                    mealDish.setFat(template.getFat());
+                } else {
+                    mealDish.setName(dRequest.getName());
+                    mealDish.setCalories(dRequest.getCalories());
+                    mealDish.setProtein(dRequest.getProtein());
+                    mealDish.setCarbs(dRequest.getCarbs());
+                    mealDish.setFat(dRequest.getFat());
+                }
+                return mealDish;
+            }).collect(Collectors.toList());
+
+            meal.getDishes().addAll(dishes);
+        }
+
+        updateMealTemplateTotals(meal);
+        return mealRepository.save(meal);
     }
 
     @Transactional
@@ -224,10 +281,59 @@ public class MealService {
         return mealLogRepository.findAllByUserIdAndMealTimeBetween(userId, start, end);
     }
 
-    @Transactional(readOnly = true)
-    public MealLog getMealLog(String userId, String mealLogId) {
-        return mealLogRepository.findByIdAndUserId(mealLogId, userId)
+    @Transactional
+    public MealLog updateMealLog(String userId, String mealLogId, MealLogRecordRequest request) {
+        MealLog mealLog = mealLogRepository.findByIdAndUserId(mealLogId, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Meal log not found: " + mealLogId));
+
+        LocalDate previousDate = mealLog.getMealTime().toLocalDate();
+
+        mealLog.setNotes(request.getNotes());
+        mealLog.setMealTime(request.getMealTime() != null ? request.getMealTime() : mealLog.getMealTime());
+
+        mealLog.getDishes().clear();
+        if (request.getDishes() != null) {
+            List<MealLogDish> dishes = request.getDishes().stream().map(dRequest -> {
+                MealLogDish mealLogDish = new MealLogDish();
+                mealLogDish.setMealLog(mealLog);
+                mealLogDish.setQuantity(dRequest.getQuantity() != null ? dRequest.getQuantity() : 1);
+                mealLogDish.setCreatedAt(mealLog.getMealTime());
+
+                if (dRequest.getDishId() != null) {
+                    Dish template = dishRepository.findById(dRequest.getDishId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Dish template not found: " + dRequest.getDishId()));
+                    if (!template.getUser().getId().equals(userId)) {
+                        throw new ResourceNotFoundException("Dish template not found: " + dRequest.getDishId());
+                    }
+                    mealLogDish.setDish(template);
+                    mealLogDish.setName(template.getName());
+                    mealLogDish.setCalories(template.getCalories());
+                    mealLogDish.setProtein(template.getProtein());
+                    mealLogDish.setCarbs(template.getCarbs());
+                    mealLogDish.setFat(template.getFat());
+                } else {
+                    mealLogDish.setName(dRequest.getName());
+                    mealLogDish.setCalories(dRequest.getCalories());
+                    mealLogDish.setProtein(dRequest.getProtein());
+                    mealLogDish.setCarbs(dRequest.getCarbs());
+                    mealLogDish.setFat(dRequest.getFat());
+                }
+                return mealLogDish;
+            }).collect(Collectors.toList());
+
+            mealLog.getDishes().addAll(dishes);
+        }
+
+        updateMealLogTotals(mealLog);
+
+        MealLog savedMealLog = mealLogRepository.save(mealLog);
+        syncIntakeSummary(savedMealLog.getUser(), previousDate);
+        LocalDate newDate = savedMealLog.getMealTime().toLocalDate();
+        if (!previousDate.equals(newDate)) {
+            syncIntakeSummary(savedMealLog.getUser(), newDate);
+        }
+
+        return savedMealLog;
     }
 
     @Transactional
