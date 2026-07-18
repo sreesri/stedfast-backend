@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,11 +35,15 @@ public class BodyStatsService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
 
-        BodyStats stats = bodyStatsRepository.findByUserIdAndLoggedDate(userId, request.getLoggedDate())
+        // logged_date is NOT NULL in the schema; default to today when the caller omits it
+        // (e.g. quick weight-only logs) instead of letting the save fail on a null constraint.
+        LocalDate loggedDate = request.getLoggedDate() != null ? request.getLoggedDate() : LocalDate.now();
+
+        BodyStats stats = bodyStatsRepository.findByUserIdAndLoggedDate(userId, loggedDate)
                 .orElse(new BodyStats());
 
         stats.setUser(user);
-        stats.setLoggedDate(request.getLoggedDate());
+        stats.setLoggedDate(loggedDate);
         stats.setHeightCm(request.getHeightCm());
         stats.setWeightKg(request.getWeightKg());
         stats.setWaistCm(request.getWaistCm());
