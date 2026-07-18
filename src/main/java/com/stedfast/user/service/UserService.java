@@ -35,4 +35,21 @@ public class UserService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
+
+    /**
+     * Permanently deletes a user account and all associated data (data safety / right-to-erasure compliance).
+     * <p>
+     * Every user-owned table (fasting_schedules, fasting_sessions, body_stats, dishes, meals, meal_dishes,
+     * meal_logs, meal_log_dishes, user_intake_limits, user_intake_summary) declares its user_id foreign key
+     * with ON DELETE CASCADE at the database level, so deleting the user row is sufficient to erase all of
+     * their data. This keeps deletion correct automatically as new user-owned tables are added, instead of
+     * relying on an application-level list that can drift out of sync.
+     */
+    @Transactional
+    public void deleteUserAccountAndData(String userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userId));
+
+        userRepository.delete(user);
+    }
 }
