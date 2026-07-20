@@ -1,5 +1,6 @@
 package com.stedfast.meal.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import de.fxlae.typeid.TypeId;
 import jakarta.persistence.*;
@@ -27,7 +28,7 @@ public class MealLogDish {
         }
     }
 
-    @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "meal_log_id", nullable = false)
     private MealLog mealLog;
