@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -276,8 +276,8 @@ public class MealService {
 
     @Transactional(readOnly = true)
     public List<MealLog> getMealLogsForDay(String userId, LocalDate date) {
-        ZonedDateTime start = date.atStartOfDay(ZoneId.systemDefault());
-        ZonedDateTime end = date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
+        ZonedDateTime start = date.atStartOfDay(ZoneOffset.UTC);
+        ZonedDateTime end = date.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC);
         return mealLogRepository.findAllByUserIdAndMealTimeBetween(userId, start, end);
     }
 
@@ -372,8 +372,8 @@ public class MealService {
     // ----- Intake Summary -----
     @Transactional
     public void syncIntakeSummary(User user, LocalDate date) {
-        ZonedDateTime start = date.atStartOfDay(ZoneId.systemDefault());
-        ZonedDateTime end = date.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
+        ZonedDateTime start = date.atStartOfDay(ZoneOffset.UTC);
+        ZonedDateTime end = date.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC);
 
         List<MealLog> dailyLog = mealLogRepository.findAllByUserIdAndMealTimeBetween(user.getId(), start, end);
 
@@ -413,8 +413,8 @@ public class MealService {
     }
 
     public List<UserIntakeSummary> getIntakeSummaries(String userId, LocalDate startDate, LocalDate endDate) {
-        ZonedDateTime start = startDate.atStartOfDay(ZoneId.systemDefault());
-        ZonedDateTime end = endDate.atTime(LocalTime.MAX).atZone(ZoneId.systemDefault());
+        ZonedDateTime start = startDate.atStartOfDay(ZoneOffset.UTC);
+        ZonedDateTime end = endDate.atTime(LocalTime.MAX).atZone(ZoneOffset.UTC);
         return intakeSummaryRepository.findAllByUserIdAndLoggedDateBetweenOrderByLoggedDateAsc(userId, start, end);
     }
 
